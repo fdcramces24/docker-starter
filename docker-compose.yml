@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: laravel-app_demo
+    working_dir: /var/www/backend
+    volumes:
+      - ../backend:/var/www/backend
+    ports:
+      - "9000:9000"
+    networks:
+      - myproject
+
+  composer:
+    image: composer:latest
+    container_name: composer_demo
+    working_dir: /var/www/backend
+    volumes:
+      - ../backend:/var/www/backend
+    networks:
+      - myproject
+    command: ["composer", "install"]
+
+  node:
+    image: node:18-alpine
+    container_name: node_demo
+    working_dir: /var/www/frontend
+    volumes:
+      - ../frontend:/var/www/frontend
+    networks:
+      - myproject
+    command: ["sh", "-c", "npm install && npm run build && tail -f /dev/null"]
+    ports:
+      - "3001:3000"
+      - "5173:5173" # For Vite development
+
+  webserver:
+    image: nginx:latest
+    container_name: nginx_demo
+    volumes:
+      - ../frontend/build:/var/www/frontend/build # Serve the React build
+      - ../backend:/var/www/backend # Serve the Laravel backend
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    ports:
+      - "8001:80"
+    networks:
+      - myproject
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_demo
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_PASSWORD: secret
+      MYSQL_USER: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - myproject
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_demo
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "8083:80"
+    networks:
+      - myproject
+
+networks:
+  myproject:
+    driver: bridge
