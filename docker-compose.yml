@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  mydockernet:
+    driver: bridge
+
 services:
   app:
     build:
@@ -12,7 +16,7 @@ services:
     ports:
       - "9000:9000"
     networks:
-      - myproject
+      - mydockernet
 
   composer:
     image: composer:latest
@@ -21,7 +25,7 @@ services:
     volumes:
       - ../backend:/var/www/backend
     networks:
-      - myproject
+      - mydockernet
     command: ["composer", "install"]
 
   node:
@@ -31,10 +35,9 @@ services:
     volumes:
       - ../frontend:/var/www/frontend
     networks:
-      - myproject
+      - mydockernet
     command: ["sh", "-c", "npm install && npm run dev"]
     ports:
-      - "3000:3000"
       - "5173:5173" # For Vite development
 
   webserver:
@@ -47,7 +50,9 @@ services:
     ports:
       - "8001:80"
     networks:
-      - myproject
+      - mydockernet
+    depends_on:
+      - node
 
   db:
     image: mysql:8.0
@@ -62,7 +67,7 @@ services:
     volumes:
       - ./data:/var/lib/mysql
     networks:
-      - myproject
+      - mydockernet
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -74,8 +79,4 @@ services:
     ports:
       - "8083:80"
     networks:
-      - myproject
-
-networks:
-  myproject:
-    driver: bridge
+      - mydockernet
