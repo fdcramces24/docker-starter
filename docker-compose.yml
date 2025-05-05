@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 networks:
   mydockernet:
@@ -61,7 +61,6 @@ services:
       MYSQL_DATABASE: laravel
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_PASSWORD: secret
-      MYSQL_USER: root
     ports:
       - "3307:3306"
     volumes:
