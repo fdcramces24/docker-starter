@@ -80,3 +80,18 @@ services:
       - "8083:80"
     networks:
       - mydockernet
+
+  socket-server:
+    build:
+      context: ./docker/socket-server
+      dockerfile: Dockerfile
+    container_name: socket-server_demo
+    working_dir: /usr/src/app
+    volumes:
+      - ../socket-server:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    networks:
+      - mydockernet
+    command: ["npm", "run", "dev"]
